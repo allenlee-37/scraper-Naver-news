@@ -27,7 +27,7 @@ def get_newspaper_txt()->dict:
     신문 이름 입력 -> 신문에 해당하는 아이디 번호를 전달
     news-paper.txt를 활용해 dictionary를 만듬
     '''
-    f = open('news-paper.txt', 'r')
+    f = open('./newspaper/newspaper.txt', 'r')
     raw_data = f.read()
     raw_data = raw_data.replace('\n','')
     raw_data = raw_data.split(',')
@@ -99,7 +99,7 @@ for i in range(1, len(list(get_newspaper_txt().keys()))):
 
 driver.quit()
 info_result = info_result.reset_index(drop=True)
-info_result.to_csv('resultdfdfdfdf.csv')
+info_result.to_csv('./result/resultdfdfdfdf.csv')
 
 
 '''
