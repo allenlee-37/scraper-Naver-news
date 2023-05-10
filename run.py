@@ -77,7 +77,8 @@ def get_page_info(paper_name='경향신문',
     info = pd.DataFrame({
         'Date': article_dates,
         'Title': article_titles,
-        'Url': article_urls
+        'Url': article_urls,
+        'NewsPaper': paper_name
     })
 
     disability = driver.find_element(By.XPATH, '//*[@id="main_pack"]/div[2]/div/a[2]')
@@ -86,34 +87,23 @@ def get_page_info(paper_name='경향신문',
 
     return info, disability
 
-info_result, disability = get_page_info(paper_name=list(get_newspaper_txt().keys())[0], page_num = 0)
-for i in range(1, len(list(get_newspaper_txt().keys()))):
-    disability=False
-    print(i)
-    num = 1
-    while disability == False:
-        info, disability = get_page_info(paper_name=list(get_newspaper_txt().keys())[i], page_num = num)
-        info_result = pd.concat([info_result, info])
-        num = num+1
-        print(list(get_newspaper_txt().keys())[i])
+def get_urls_articles():
+    '''준비된 신문사들의 기사 url을 모두 가져옴'''
+    # 첫번째 url과 disability를 가져옴
+    # disability는 네이버뉴스에서 다음페이지로 넘어가기가 해제된 것을 의미함 (마지막 페이지)
+    # disability가 True일때 크롤러는 마지막 장에 도착한 것임
+    info_result, disability = get_page_info(paper_name=list(get_newspaper_txt().keys())[0], page_num = 0)
+    for i in range(1, len(list(get_newspaper_txt().keys()))):
+        disability=False
+        print(i)
+        num = 1
+        while disability == False:
+            info, disability = get_page_info(paper_name=list(get_newspaper_txt().keys())[i], page_num = num)
+            info_result = pd.concat([info_result, info])
+            num = num+1
+            print(list(get_newspaper_txt().keys())[i])
 
-driver.quit()
-info_result = info_result.reset_index(drop=True)
-info_result.to_csv('./result/resultdfdfdfdf.csv')
-
-
-'''
-info_result, disability=get_page_info(paper_name=get_newspaper_txt().keys()[0], page_num = 0)
-num=1
-while disability == False:
-    info, disability = get_page_info(page_num = num)
-    info_result = pd.concat([info_result, info])
-    num = num+1
-
-driver.quit()
-info_result = info_result.reset_index(drop=True)
-info_result.to_csv('resultdfdfdfdf.csv')
-
-get_newspaper_txt().keys()[0]'''
-
-print(len(list(get_newspaper_txt().keys())))
+    driver.quit()
+    info_result = info_result.reset_index(drop=True)
+    info_result.to_csv('./result/url_info.csv')
+    return
