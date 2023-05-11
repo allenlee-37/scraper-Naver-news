@@ -58,8 +58,6 @@ def get_page_info(paper_name='경향신문',
     news_paper = get_newspaper_num(paper_name)
     url = get_url(keyword, start_date, end_date, news_paper, page_num)
 
-    # driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-    driver.implicitly_wait(2)
     driver.get(url)
 
     article_dates_raw = driver.find_elements(By.XPATH, '//span[@class="info"]')# //div[@class="news_area"]/div/div/span
@@ -107,3 +105,29 @@ def get_urls_articles():
     info_result = info_result.reset_index(drop=True)
     info_result.to_csv('./result/url_info.csv')
     return
+
+def get_texts():
+    raw_data = pd.read_csv('./result/url_info.csv')
+    def 경향신문(url, newspaper):
+
+        pass
+
+    for i in range(len(raw_data)):
+        
+
+
+
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    driver.get(url)
+
+    driver.get
+
+
+
+
+def main():  
+    get_urls_articles()
+    get_texts()
+    return
+
+if __name__ == "__main__": main()
