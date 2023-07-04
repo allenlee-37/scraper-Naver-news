@@ -1,3 +1,8 @@
+'''
+대상: newspaper.txt에 있는 신문사
+검색어 집어넣으면 그 신문사의 관련 내용을 땡겨옴
+기간: 자유롭게 설정 가능 
+'''
 import argparse
 import os
 
@@ -17,7 +22,7 @@ import re
 options = webdriver.ChromeOptions()
 options.add_argument('window-size=1920x1080')
 options.add_experimental_option("detach", True)
-# options.add_argument('headless')
+options.add_argument('headless')
 # options.add_argument('disable-gpu')
 
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
@@ -26,10 +31,8 @@ driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), opti
 # 키값: 신문이름
 # Value: 신문의 url 아이디
 def get_newspaper_txt()->dict:
-    '''
-    신문 이름 입력 -> 신문에 해당하는 아이디 번호를 전달
-    news-paper.txt를 활용해 dictionary를 만듬
-    '''
+    '''news-paper.txt 내용에서 dictionary를 만듬'''
+    
     f = open('./newspaper/newspaper.txt', 'r')
     raw_data = f.read()
     raw_data = raw_data.replace('\n','')
@@ -51,6 +54,7 @@ def get_newspaper_txt()->dict:
 
 # url을 구함
 def get_url(search_word, start_date, end_date, media_num, page_num)->str:
+    '''해당 기간 동안 '''
     return f'https://search.naver.com/search.naver?where=news&sm=tab_pge&query={search_word}&sort=1&photo=0&field=0&pd=3&ds={start_date}&de={end_date}&mynews=1&office_type=1&office_section_code=1&news_office_checked={media_num}&nso=so:dd,p:from20220101to20221231,a:all&start={page_num*10+1}'
 
 # 특정 한 페이지의 정보를 모두 가져옴
@@ -88,40 +92,35 @@ def get_page_info(paper_name,keyword,start_date,end_date,page_num)->pd.DataFrame
 
     return info, disability
 
-def get_urls_articles(paper_name, keyword, start_date, end_date, page_num):
+def get_urls_articles(keyword,start_date,end_date,page_num):
     '''준비된 신문사들의 기사 url을 모두 가져옴'''
     # 첫번째 url과 disability를 가져옴
     # disability는 네이버뉴스에서 다음페이지로 넘어가기가 해제된 것을 의미함 (마지막 페이지)
     # disability가 True일때 크롤러는 마지막 장에 도착한 것임
-    info_result, disability = get_page_info(paper_name=list(get_newspaper_txt().keys())[0])
-    for i in range(1, len(list(get_newspaper_txt().keys()))):
+
+    paper_num_list = list(get_newspaper_txt().keys())
+    # 첫번째 신문의 정보 가져오기
+    info_result, disability = get_page_info(paper_name=paper_num_list[0], 
+                                            keyword=keyword, 
+                                            start_date=start_date,
+                                            end_date=end_date,
+                                            page_num=page_num)
+    for i in range(0, len(paper_num_list)):
         disability=False
         print(i)
         num = 1
         while disability == False:
-            info, disability = get_page_info(paper_name=list(get_newspaper_txt().keys())[i],page_num = num)
+            info, disability = get_page_info(paper_name=paper_num_list[i],
+                                             keyword=keyword,
+                                             start_date=start_date,
+                                             end_date=end_date,
+                                             page_num = num)
             info_result = pd.concat([info_result, info])
             num = num+1
-            print(list(get_newspaper_txt().keys())[i])
+            print(paper_num_list[i])
 
-    driver.quit()
     info_result = info_result.reset_index(drop=True)
-    info_result.to_csv('./result/url_info.csv')
-    return
-
-def get_texts():
-    raw_data = pd.read_csv('./result/url_info.csv')
-    def 경향신문(url, newspaper):
-
-        pass
-'''
-    for i in range(len(raw_data)):
-        
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-    driver.get(url)
-
-    driver.get
-'''
+    return info_result
 
 def main():
     # 키 값과 내용 부여
@@ -134,14 +133,12 @@ def main():
     keyword = '경기 관광'
     start_date = '2022.01.01'
     end_date = '2022.12.31'
-
-    info, disability = get_page_info(paper_name,keyword,start_date,end_date,page_num)
-    print(info)
-
-    '''get_urls_articles(keyword,start_date,end_date)
-    get_texts()'''
+    
+    url_df = get_urls_articles(keyword,start_date,end_date,page_num) 
+    url_df.to_csv('./result/url_info.csv')
 
     driver.quit()
+    print('finished crawling url and article titles')
     return
 
 if __name__ == "__main__": main()
