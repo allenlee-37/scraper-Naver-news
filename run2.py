@@ -22,6 +22,9 @@ options.add_experimental_option("detach", True)
 
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
+# 신문 딕셔너리 값을 반환 
+# 키값: 신문이름
+# Value: 신문의 url 아이디
 def get_newspaper_txt()->dict:
     '''
     신문 이름 입력 -> 신문에 해당하는 아이디 번호를 전달
@@ -41,17 +44,21 @@ def get_newspaper_txt()->dict:
 
     return paper_dict
 
-def get_newspaper_num(news_paper_name)->int:
+'''def get_newspaper_num(news_paper_name)->int:
     paper_dict = get_newspaper_txt()
     result = paper_dict[news_paper_name]
-    return result
+    return result'''
 
+# url을 구함
 def get_url(search_word, start_date, end_date, media_num, page_num)->str:
     return f'https://search.naver.com/search.naver?where=news&sm=tab_pge&query={search_word}&sort=1&photo=0&field=0&pd=3&ds={start_date}&de={end_date}&mynews=1&office_type=1&office_section_code=1&news_office_checked={media_num}&nso=so:dd,p:from20220101to20221231,a:all&start={page_num*10+1}'
 
+# 특정 한 페이지의 정보를 모두 가져옴
+# 제목/ url/ 기사의 날짜/ 신문 이름
+# 페이지 번호와 신문 이름이 바뀌면서 계속 반복하도록 만들어줘야함
 def get_page_info(paper_name,keyword,start_date,end_date,page_num)->pd.DataFrame:
     # 경향신문 테스트
-    news_paper = get_newspaper_num(paper_name)
+    news_paper = get_newspaper_txt()[paper_name]
     url = get_url(keyword, start_date, end_date, news_paper, page_num)
 
     driver.get(url)
@@ -116,15 +123,25 @@ def get_texts():
     driver.get
 '''
 
+def main():
+    # 키 값과 내용 부여
+    paper_name_list = list(get_newspaper_txt().keys())
+    paper_num_list = list(get_newspaper_txt().values())
+    #test
+    paper_name = '경향신문'
+    page_num = 1
 
+    keyword = '경기 관광'
+    start_date = '2022.01.01'
+    end_date = '2022.12.31'
 
-def main():  
-    get_urls_articles(paper_name=list(get_newspaper_txt().keys())[0], 
-                      keyword='경기도 관광',
-                      start_date='2022.01.01',
-                      end_date='2022.12.31',
-                      page_num = 1)
-    get_texts()
+    info, disability = get_page_info(paper_name,keyword,start_date,end_date,page_num)
+    print(info)
+
+    '''get_urls_articles(keyword,start_date,end_date)
+    get_texts()'''
+
+    driver.quit()
     return
 
 if __name__ == "__main__": main()
